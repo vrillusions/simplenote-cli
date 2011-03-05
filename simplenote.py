@@ -31,14 +31,25 @@ class Simplenote:
         self.base_url = 'https://simple-note.appspot.com/api2/'
         self.email = email
         self.password = password
+        self.last_error = ''
     
     def login(self):
         # the login url is just api
         url = 'https://simple-note.appspot.com/api/login'
-        data = 'email=' + self.email + '&password=' + self.password
-        data = base64.b64encode(data)
-        fh = urllib2.urlopen(url, data)
-        self.authtok = fh.read()
+        query = {'email': self.email, 'password': self.password}
+        data = base64.b64encode(urllib.urlencode(query))
+        try:
+            fh = urllib2.urlopen(url, data)
+            self.authtok = fh.read()
+        except urllib2.HTTPError, e:
+            # Received a non 2xx status code
+            self.last_error = 'http error: ' + str(e.code)
+            print e.readlines()
+            return None
+        except urllib2.URLError, e:
+            # Non http error, like network issue
+            self.last_error = 'url error:', e.reason
+            return None
         fh.close()
     
     def note(self):
@@ -49,12 +60,13 @@ class Simplenote:
     
     def index(self, length=100):
         url = self.base_url + 'index'
-        data = 'length=' + str(length) + '&auth=' + self.authtok + '&email=' + self.email
+        query = {'length': length, 'auth': self.authtok, 'email': self.email}
+        data = urllib.urlencode(query)
         # this is a get request so everything is sent in url
         fh = urllib2.urlopen(url + '?' + data)
         index = fh.read()
         fh.close()
-        return(index)
+        return index
 
  
 def main():
@@ -71,6 +83,9 @@ def main():
     
     sn = Simplenote(email, password)
     sn.login()
+    if sn.last_error != '':
+        print 'ERROR:', sn.last_error
+        sys.exit(1)
     print sn.index(1)
  
  
