@@ -14,25 +14,38 @@ import sys
 import traceback
 from optparse import OptionParser
 from ConfigParser import ConfigParser
-
+from subprocess import Popen, PIPE
 # Make some effort to be backwards compatible with 2.5
 try: 
     import json
 except ImportError: 
     import simplejson as json
 
+# development modules, can be removed later
+import pprint
 
-__version__ = 'alpha'
+
+git_version = Popen(['git', 'describe', '--always'], 
+    stdout=PIPE, stderr=PIPE).stdout.read().strip()
+__version__ = git_version if git_version else 'alpha'
 
 
 class Simplenote:
-    """The core Simplenote class"""
+    """The core Simplenote class."""
     def __init__(self, email, password):
         self.base_url = 'https://simple-note.appspot.com/api2/'
         self.email = email
         self.password = password
+        self.has_error = False
         self.last_error = ''
-    
+     
+    def _error(self, msg='', exitcode=None):
+        self.has_error = True
+        self.last_error = msg
+        if exitcode != None:
+            print msg
+            sys.exit(exitcode)
+        
     def login(self):
         # the login url is just api
         url = 'https://simple-note.appspot.com/api/login'
@@ -43,17 +56,25 @@ class Simplenote:
             self.authtok = fh.read()
         except urllib2.HTTPError, e:
             # Received a non 2xx status code
-            self.last_error = 'http error: ' + str(e.code)
+            self._error('http error: ' + str(e.code))
             print e.readlines()
             return None
         except urllib2.URLError, e:
             # Non http error, like network issue
-            self.last_error = 'url error:', e.reason
+            self._error('url error:' + e.reason)
             return None
         fh.close()
     
-    def note(self):
-        pass
+    def note(self, key=None):
+        if key == None:
+            self._error('Unable to get note: Key not given')
+        url = self.base_url + 'data/' + key
+        query = {'auth': self.authtok, 'email': self.email}
+        data = urllib.urlencode(query)
+        fh = urllib2.urlopen(url + '?' + data)
+        note = json.loads(fh.read())
+        fh.close()
+        return note
     
     def delete(self):
         pass
@@ -64,7 +85,7 @@ class Simplenote:
         data = urllib.urlencode(query)
         # this is a get request so everything is sent in url
         fh = urllib2.urlopen(url + '?' + data)
-        index = fh.read()
+        index = json.loads(fh.read())
         fh.close()
         return index
 
@@ -86,7 +107,11 @@ def main():
     if sn.last_error != '':
         print 'ERROR:', sn.last_error
         sys.exit(1)
-    print sn.index(1)
+    index = sn.index(1)
+    pp = pprint.PrettyPrinter(indent=4)
+    for note_meta in index['data']:
+        note = sn.note(note_meta['key'])
+        pp.pprint(note)
  
  
 if __name__ == "__main__":
