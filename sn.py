@@ -7,19 +7,11 @@ Command line interface to simplenote.
 """
 
 
-import urllib
-import urllib2
-import base64
 import sys
 import traceback
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
-# Make some effort to be backwards compatible with 2.5
-try: 
-    import json
-except ImportError: 
-    import simplejson as json
     
 from simplenote import Simplenote
 
@@ -54,6 +46,7 @@ def main():
     for note_meta in index['data']:
         note = sn.note(note_meta['key'])
         pp.pprint(note)
+    print 'Number of api calls:', str(sn.api_count)
  
  
 if __name__ == "__main__":
