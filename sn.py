@@ -31,20 +31,28 @@ def main():
         help='Location of config file (default: %default)', metavar='FILE')
     (options, args) = parser.parse_args() 
  
+    if args:
+        print 'debug: you wanted to run command: ' + args[0]
+    
     config = ConfigParser()
     config.read(options.config)
     email = config.get('simplenote', 'email')
     password = config.get('simplenote', 'password')
     
     sn = Simplenote(email, password)
-    sn.login()
-    if sn.last_error != '':
+    if not sn.login():
         print 'ERROR:', sn.last_error
         sys.exit(1)
     index = sn.index(1)
+    if sn.has_error:
+        print 'ERROR:', sn.last_error
+        sys.exit(1)
     pp = pprint.PrettyPrinter(indent=4)
     for note_meta in index['data']:
         note = sn.note(note_meta['key'])
+        if sn.has_error:
+            print 'ERROR:', sn.last_error
+            sys.exit(1)
         pp.pprint(note)
     print 'Number of api calls:', str(sn.api_count)
  

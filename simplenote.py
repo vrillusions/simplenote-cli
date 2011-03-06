@@ -108,7 +108,11 @@ class Simplenote:
         return json.loads(response)
         
     def login(self):
-        """Logs in to Simplenote. Required before other methods."""
+        """Logs in to Simplenote. Required before other methods.
+        
+        Returns False on error, True if successful.
+        
+        """
         # the login url is just api, not api2
         url = 'https://simple-note.appspot.com/api/login'
         query = {'email': self.email, 'password': self.password}
@@ -120,12 +124,13 @@ class Simplenote:
             # Received a non 2xx status code
             self._error('http error: ' + str(e.code))
             print e.readlines()
-            return None
+            return False
         except urllib2.URLError, e:
             # Non http error, like network issue
             self._error('url error:' + e.reason)
-            return None
+            return False
         fh.close()
+        return True
     
     def note(self, key=None):
         """Retreives a single note.
