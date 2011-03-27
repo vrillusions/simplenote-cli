@@ -147,13 +147,35 @@ class Simplenote:
     def delete(self):
         pass
     
-    def index(self, length=100):
+    def index(self, length=100, mark=None):
         """Retrieves index of notes.
 
         length: How many to retreive, defaults to 100 (max)
+        mark: Get the next batch of notes.
         
         """
         url = self.base_url + 'index'
         query = {'length': length}
+        if mark is not None:
+            query.update({'mark': mark})
         index = self._process_query(url, query)
         return index
+    
+    def full_index(self):
+        """Retrieves full index of notes."""
+        indextmp = self.index()
+        full_index = []
+        for note in indextmp['data']:
+            full_index.append(note)
+        while True:
+            if 'mark' in indextmp:
+                mark = indextmp['mark']
+                indextmp = ''
+                indextmp = self.index(mark=mark)
+                if self.has_error is True:
+                    return False
+                for note in indextmp['data']:
+                    full_index.append(note)
+            else:
+                break
+        return full_index
