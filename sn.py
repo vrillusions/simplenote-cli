@@ -11,7 +11,7 @@ import sys
 import os
 import traceback
 from optparse import OptionParser
-from ConfigParser import ConfigParser
+from ConfigParser import SafeConfigParser
 from subprocess import Popen, PIPE
 import xml.etree.ElementTree as ET
 import json
@@ -60,7 +60,7 @@ def main():
     if args:
         print 'debug: you wanted to run command: ' + args[0]
     
-    config = ConfigParser()
+    config = SafeConfigParser()
     # can pass multiple files to config.read but it merges them, which we don't want
     if not config.read(options.config):
         # could not read file, try the script's path
