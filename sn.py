@@ -8,6 +8,7 @@ Command line interface to simplenote.
 
 
 import sys
+import os
 import traceback
 from optparse import OptionParser
 from ConfigParser import ConfigParser
@@ -53,11 +54,20 @@ def main():
         help='Output file name (default: %default)', metavar='FILE')
     (options, args) = parser.parse_args() 
  
+    # set script's path and add '/' to end
+    script_path = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
+ 
     if args:
         print 'debug: you wanted to run command: ' + args[0]
     
     config = ConfigParser()
-    config.read(options.config)
+    # can pass multiple files to config.read but it merges them, which we don't want
+    if not config.read(options.config):
+        # could not read file, try the script's path
+        if not config.read(script_path + options.config):
+            # Still can't find it, error out
+            print 'Could not read any config file'
+            sys.exit(1)
     email = config.get('simplenote', 'email')
     password = config.get('simplenote', 'password')
     
