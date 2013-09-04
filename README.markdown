@@ -1,4 +1,4 @@
-# Simplenote Command-line Interface
+# Simplenote Command-line Interface [![status](http://stillmaintained.com/vrillusions/simplenote-cli.png)](http://stillmaintained.com/vrillusions/simplenote-cli)
 
 Currently just a way to do offsite backups via command-line but will eventually
 be a more full-featured [simplenote](http://simplenoteapp.com) client.
