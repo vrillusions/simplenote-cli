@@ -37,7 +37,7 @@ __version__ = git_version if git_version else 'alpha'
 del git_version, PIPE
 
 
-class Simplenote:
+class Simplenote(object):
     """The core Simplenote class."""
     def __init__(self, email, password):
         """Sets up initial variables.
