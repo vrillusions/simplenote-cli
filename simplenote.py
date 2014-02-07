@@ -24,9 +24,9 @@ import base64
 import sys
 from subprocess import Popen, PIPE
 # Make some effort to be backwards compatible with 2.5
-try: 
+try:
     import json
-except ImportError: 
+except ImportError:
     import simplejson as json
 
 
@@ -41,10 +41,10 @@ class Simplenote:
     """The core Simplenote class."""
     def __init__(self, email, password):
         """Sets up initial variables.
-        
+
         email: The users' email address
         password: The users' password
-        
+
         """
         self.base_url = 'https://simple-note.appspot.com/api2/'
         self.email = email
@@ -53,44 +53,44 @@ class Simplenote:
         self.has_error = False
         self.last_error = ''
         self.api_count = 0
-     
+
     def _error(self, msg='', exitcode=None):
         """Error handling.
-        
+
         Sets has_error to True and last_error to given message.
         Optionally can be told to exit if a critical error occurs.
-        
+
         """
         self.has_error = True
         self.last_error = msg
         if exitcode != None:
             print msg
             sys.exit(exitcode)
-    
+
     def _process_query(self, url, query={}, add_authtok=True):
         """Processes the given url and query dictionary
-        
+
         It's assumed all calls are GET requests and data is returned
         in JSON format. Increments api_count each time it's run.
         Returns False on error.
-        
+
         url: The full url
         query (optional): Key, value dictionary with query variables.
         add_authtok (default: True): adds authentication information to
             query string
-        
+
         """
         if add_authtok:
             if self.authtok == '':
                 self._error('No auth token, must login first')
                 return False
             query.update({'auth': self.authtok, 'email': self.email})
-        
+
         if len(query) > 0:
             request = url + '?' + urllib.urlencode(query)
         else:
             request = url
-        
+
         self.api_count += 1
         try:
             fh = urllib2.urlopen(request)
@@ -106,12 +106,12 @@ class Simplenote:
             self._error('url error:' + e.reason)
             return False
         return json.loads(response)
-        
+
     def login(self):
         """Logs in to Simplenote. Required before other methods.
-        
+
         Returns False on error, True if successful.
-        
+
         """
         # the login url is just api, not api2
         url = 'https://simple-note.appspot.com/api/login'
@@ -131,28 +131,28 @@ class Simplenote:
             return False
         fh.close()
         return True
-    
+
     def note(self, key=None):
         """Retreives a single note.
-        
+
         key: The note's key (can be obtained from index call)
-        
+
         """
         if key == None:
             self._error('Unable to get note: Key not given')
         url = self.base_url + 'data/' + key
         note = self._process_query(url)
         return note
-    
+
     def delete(self):
         pass
-    
+
     def index(self, length=100, mark=None):
         """Retrieves index of notes.
 
         length: How many to retreive, defaults to 100 (max)
         mark: Get the next batch of notes.
-        
+
         """
         url = self.base_url + 'index'
         query = {'length': length}
@@ -160,7 +160,7 @@ class Simplenote:
             query.update({'mark': mark})
         index = self._process_query(url, query)
         return index
-    
+
     def full_index(self):
         """Retrieves full index of notes."""
         indextmp = self.index()

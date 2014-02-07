@@ -43,8 +43,8 @@ def dict_to_xml(dict):
 def format_date(timestamp):
     date = datetime.fromtimestamp(timestamp)
     return date.strftime('%b %d %Y %H:%M:%S')
-    
-    
+
+
 def main():
     """The main function."""
     parser = OptionParser(version='%prog v' + __version__)
@@ -53,13 +53,13 @@ def main():
     parser.add_option('-o', '--output', default='simplenotebak.json.txt',
         help='Output file name (default: %default)', metavar='FILE')
     (options, args) = parser.parse_args() 
- 
+
     # set script's path and add '/' to end
     script_path = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
- 
+
     if args:
         print 'debug: you wanted to run command: ' + args[0]
-    
+
     config = SafeConfigParser()
     # can pass multiple files to config.read but it merges them, which we don't want
     if not config.read(options.config):
@@ -70,7 +70,7 @@ def main():
             sys.exit(1)
     email = config.get('simplenote', 'email')
     password = config.get('simplenote', 'password')
-    
+
     sn = Simplenote(email, password)
     if not sn.login():
         print 'ERROR:', sn.last_error
@@ -126,22 +126,22 @@ def main():
     fh = open(options.output, 'w')
     fh.write(json.dumps(jsonnotes))
     fh.close()
- 
- 
+
+
 if __name__ == "__main__":
-	try:
-		main()
-	except KeyboardInterrupt, e:
-		# Ctrl-c
-		raise e
-	except SystemExit, e:
-		# sys.exit()
-		raise e
-	except Exception, e:
-		print "ERROR, UNEXPECTED EXCEPTION"
-		print str(e)
-		traceback.print_exc()
-		sys.exit(1)
-	else:
-		# Main function is done, exit cleanly
-		sys.exit(0)
+    try:
+        main()
+    except KeyboardInterrupt, e:
+        # Ctrl-c
+        raise e
+    except SystemExit, e:
+        # sys.exit()
+        raise e
+    except Exception, e:
+        print "ERROR, UNEXPECTED EXCEPTION"
+        print str(e)
+        traceback.print_exc()
+        sys.exit(1)
+    else:
+        # Main function is done, exit cleanly
+        sys.exit(0)
