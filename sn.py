@@ -4,30 +4,30 @@
 
 Command line interface to simplenote.
 
+Environment Variables
+    LOGLEVEL: overrides the level specified here. Default is warning
+
 """
 
 
 import sys
 import os
-import traceback
 from optparse import OptionParser
 from ConfigParser import SafeConfigParser
-from subprocess import Popen, PIPE
 import xml.etree.ElementTree as ET
 import json
 from datetime import datetime
 import math
+import logging
 
 from simplenote import Simplenote
-import progress_bar as pb
+import util.progress_bar as pb
 
 # development modules, can be removed later
 import pprint
 
 
-git_version = Popen(['git', 'describe', '--always'], 
-    stdout=PIPE, stderr=PIPE).stdout.read().strip()
-__version__ = git_version if git_version else 'alpha'
+__version__ = '0.3.0'
 
 
 def dict_to_xml(dict):
@@ -54,36 +54,37 @@ def main():
         help='Output file name (default: %default)', metavar='FILE')
     (options, args) = parser.parse_args() 
 
+    log = logging.getLogger('sn')
+
     # set script's path and add '/' to end
     script_path = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
 
-    if args:
-        print 'debug: you wanted to run command: ' + args[0]
+    # TODO: PUT CODE HERE TO PULL XDG DIRECTORIES
 
+    if args:
+        log.debug('you wanted to run command: {}'.format(args[0]))
     config = SafeConfigParser()
     # can pass multiple files to config.read but it merges them, which we don't want
     if not config.read(options.config):
         # could not read file, try the script's path
         if not config.read(script_path + options.config):
             # Still can't find it, error out
-            print 'Could not read any config file'
-            sys.exit(1)
+            log.critical('could not read any config file')
+            return 1
     email = config.get('simplenote', 'email')
     password = config.get('simplenote', 'password')
 
+    # TODO: GET PATH TO CACHE FILE (PROBABLY THROUGH XDG)
+
+    #sn = Simplenote(email, password, cache_file)
     sn = Simplenote(email, password)
-    if not sn.login():
-        print 'ERROR:', sn.last_error
-        sys.exit(1)
+    sn.login()
     index = sn.full_index()
     #index = sn.index(5)
-    if sn.has_error:
-        print 'ERROR:', sn.last_error
-        sys.exit(1)
     #print '- index -'
     #pp = pprint.PrettyPrinter(indent=4)
     #pp.pprint(index)
-    print 'number of notes:', str(len(index))
+    log.info('number of notes: {}'.format(len(index)))
     notecount = float(len(index))
     #print '- data -'
     notes = []
@@ -91,14 +92,11 @@ def main():
     #for note_meta in index['data']:
     for note_meta in index:
         note = sn.note(note_meta['key'])
-        if sn.has_error:
-            print 'ERROR:', sn.last_error
-            sys.exit(1)
         notes.append(note)
         #pp.pprint(note)
         i += 1
         pb.progress(50, math.floor(float(i) / notecount * 100.0))
-    print 'Number of api calls:', str(sn.api_count)
+    log.debug('Number of api calls: {}'.format(sn.api_count))
     # xml format
     #xmlnotes = ''
     #for note in notes:
@@ -123,25 +121,17 @@ def main():
         json_note_tmp.update({'key': note['key']})
         jsonnotes.append(json_note_tmp)
     #print json.dumps(jsonnotes)
-    fh = open(options.output, 'w')
-    fh.write(json.dumps(jsonnotes))
-    fh.close()
+    with open(options.output, 'w') as fh:
+        fh.write(json.dumps(jsonnotes))
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt, e:
-        # Ctrl-c
-        raise e
-    except SystemExit, e:
-        # sys.exit()
-        raise e
-    except Exception, e:
-        print "ERROR, UNEXPECTED EXCEPTION"
-        print str(e)
-        traceback.print_exc()
-        sys.exit(1)
-    else:
-        # Main function is done, exit cleanly
-        sys.exit(0)
+    # Logger config
+    # DEBUG, INFO, WARNING, ERROR, or CRITICAL
+    # This will set log level from the environment variable LOGLEVEL or default
+    # to warning. You can also just hardcode the error if this is simple.
+    _loglevel = getattr(logging, os.getenv('LOGLEVEL', 'WARNING').upper())
+    _logformat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=_loglevel, format=_logformat)
+
+    sys.exit(main())

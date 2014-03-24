@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # vim:ts=4:sw=4:ft=python:fileencoding=utf-8
 """Simplenote
 
@@ -22,19 +21,16 @@ import urllib
 import urllib2
 import base64
 import sys
-from subprocess import Popen, PIPE
-# Make some effort to be backwards compatible with 2.5
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import logging
+import json
+
+from .exceptions import SimplenoteError
 
 
-git_version = Popen(['git', 'describe', '--always'], 
-    stdout=PIPE, stderr=PIPE).stdout.read().strip()
-__version__ = git_version if git_version else 'alpha'
-# cleanup so this doesn't showup in pydoc
-del git_version, PIPE
+__all__ = ['Simplenote']
+
+
+_logger = logging.getLogger(__name__)
 
 
 class Simplenote(object):
@@ -46,26 +42,12 @@ class Simplenote(object):
         password: The users' password
 
         """
+        _logger.debug('Entered Simplenote()')
         self.base_url = 'https://simple-note.appspot.com/api2/'
         self.email = email
         self.password = password
         self.authtok = ''
-        self.has_error = False
-        self.last_error = ''
         self.api_count = 0
-
-    def _error(self, msg='', exitcode=None):
-        """Error handling.
-
-        Sets has_error to True and last_error to given message.
-        Optionally can be told to exit if a critical error occurs.
-
-        """
-        self.has_error = True
-        self.last_error = msg
-        if exitcode != None:
-            print msg
-            sys.exit(exitcode)
 
     def _process_query(self, url, query={}, add_authtok=True):
         """Processes the given url and query dictionary
@@ -98,13 +80,10 @@ class Simplenote(object):
             fh.close()
         except urllib2.HTTPError, e:
             # Received a non 2xx status code
-            self._error('http error: ' + str(e.code))
-            print e.readlines()
-            return False
+            raise SimplenoteError('http error: ' + str(e.code))
         except urllib2.URLError, e:
             # Non http error, like network issue
-            self._error('url error:' + e.reason)
-            return False
+            raise SimplenoteError('url error:' + e.reason)
         return json.loads(response)
 
     def login(self):
@@ -122,13 +101,10 @@ class Simplenote(object):
             self.authtok = fh.read()
         except urllib2.HTTPError, e:
             # Received a non 2xx status code
-            self._error('http error: ' + str(e.code))
-            print e.readlines()
-            return False
+            raise SimplenoteError('http error: ' + str(e.code))
         except urllib2.URLError, e:
             # Non http error, like network issue
-            self._error('url error:' + e.reason)
-            return False
+            raise SimplenoteError('url error:' + e.reason)
         fh.close()
         return True
 
@@ -139,13 +115,13 @@ class Simplenote(object):
 
         """
         if key == None:
-            self._error('Unable to get note: Key not given')
+            raise SimplenoteError('Unable to get note: Key not given')
         url = self.base_url + 'data/' + key
         note = self._process_query(url)
         return note
 
     def delete(self):
-        pass
+        raise NotImplementedError()
 
     def index(self, length=100, mark=None):
         """Retrieves index of notes.
@@ -172,8 +148,6 @@ class Simplenote(object):
                 mark = indextmp['mark']
                 indextmp = ''
                 indextmp = self.index(mark=mark)
-                if self.has_error is True:
-                    return False
                 for note in indextmp['data']:
                     full_index.append(note)
             else:

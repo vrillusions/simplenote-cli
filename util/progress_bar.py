@@ -15,7 +15,10 @@ example:
   >>> math.floor(currently / float(total) * 100)
   54.0
 
+Update: This is solved now with __future__.division
+
 """
+from __future__ import division
 import sys
 import time
 import math
@@ -27,9 +30,9 @@ import math
 def progress(width, percent):
     marks = math.floor(width * (percent / 100.0))
     spaces = math.floor(width - marks)
-    
+
     loader = '[' + ('=' * int(marks)) + (' ' * int(spaces)) + ']'
-      
+
     sys.stdout.write("%s %d%%\r" % (loader, percent))
     if percent >= 100:
         sys.stdout.write("\n")
