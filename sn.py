@@ -13,7 +13,7 @@ Environment Variables
 import sys
 import os
 from optparse import OptionParser
-from ConfigParser import SafeConfigParser
+from ConfigParser import RawConfigParser
 import xml.etree.ElementTree as ET
 import json
 from datetime import datetime
@@ -52,7 +52,7 @@ def main():
         help='Location of config file (default: %default)', metavar='FILE')
     parser.add_option('-o', '--output', default='simplenotebak.json.txt',
         help='Output file name (default: %default)', metavar='FILE')
-    (options, args) = parser.parse_args() 
+    (options, args) = parser.parse_args()
 
     log = logging.getLogger('sn')
 
@@ -63,7 +63,7 @@ def main():
 
     if args:
         log.debug('you wanted to run command: {}'.format(args[0]))
-    config = SafeConfigParser()
+    config = RawConfigParser()
     # can pass multiple files to config.read but it merges them, which we don't want
     if not config.read(options.config):
         # could not read file, try the script's path
