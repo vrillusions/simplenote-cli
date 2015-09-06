@@ -24,13 +24,13 @@ import sys
 import logging
 import json
 
-from .exceptions import SimplenoteError
-
 
 __all__ = ['Simplenote']
-
-
 _logger = logging.getLogger(__name__)
+
+
+class SimplenoteError(Exception):
+    pass
 
 
 class Simplenote(object):
