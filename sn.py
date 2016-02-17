@@ -22,6 +22,7 @@ import logging
 
 from simplenote import Simplenote
 import util.progress_bar as pb
+from util.appdirs import AppDirs
 
 # development modules, can be removed later
 import pprint
@@ -56,21 +57,35 @@ def main():
 
     log = logging.getLogger('sn')
 
-    # set script's path and add '/' to end
-    script_path = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
+    # get script's path
+    script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-    # TODO: PUT CODE HERE TO PULL XDG DIRECTORIES
+    appdir = AppDirs('simplenote-cli')
+    local_cache = os.path.join(appdir.user_data_dir, 'data.cache')
 
     if args:
         log.debug('you wanted to run command: {}'.format(args[0]))
     config = RawConfigParser()
-    # can pass multiple files to config.read but it merges them, which we don't want
+    # can pass multiple files to config.read but it merges them, which we don't
+    # want. Order here:
+    #
+    # - exact value of -c option (ie config.ini)
+    # - xdg_config_dir (ie ~/.config/vrillusions/simplenote-cli)
+    # - script path, where this file resides
+    # 1st try exact value
     if not config.read(options.config):
-        # could not read file, try the script's path
-        if not config.read(script_path + options.config):
-            # Still can't find it, error out
-            log.critical('could not read any config file')
-            return 1
+        log.info('could not read %s' % options.config)
+        # next try xdg config dir
+        xdg_config_file = os.path.join(appdir.user_config_dir, 'config.ini')
+        if not config.read(xdg_config_file):
+            log.info('could not read %s' % xdg_config_file)
+            # next try script path
+            script_config_file = os.path.join(script_path, 'config.ini')
+            if not config.read(script_config_file):
+                log.info('could not read %s' % script_config_file)
+                # Still can't find it, error out
+                log.critical('could not read any config file')
+                return 1
     email = config.get('simplenote', 'email')
     password = config.get('simplenote', 'password')
 

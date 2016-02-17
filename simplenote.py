@@ -139,17 +139,14 @@ class Simplenote(object):
 
     def full_index(self):
         """Retrieves full index of notes."""
-        indextmp = self.index()
+        index = self.index()
         full_index = []
-        for note in indextmp['data']:
+        for note in index['data']:
             full_index.append(note)
-        while True:
-            if 'mark' in indextmp:
-                mark = indextmp['mark']
-                indextmp = ''
-                indextmp = self.index(mark=mark)
-                for note in indextmp['data']:
-                    full_index.append(note)
-            else:
-                break
+        while 'mark' in index:
+            mark = index['mark']
+            index = ''
+            index = self.index(mark=mark)
+            for note in index['data']:
+                full_index.append(note)
         return full_index
