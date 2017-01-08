@@ -20,10 +20,10 @@ Update: This is solved now with __future__.division
 """
 from __future__ import division
 import sys
-import time
 import math
 
 # Output example: [=======   ] 75%
+
 
 # width defines bar width
 # percent defines current percentage

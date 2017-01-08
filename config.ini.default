@@ -1,3 +1,6 @@
 [simplenote]
 email: user@example.com
 password: CHANGE_ME
+# This can be left commented out. Mostly used so development directory differs
+# from released version
+#data_dir: /home/USERNAME/.local/share/simplenote-cli

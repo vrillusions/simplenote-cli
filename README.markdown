@@ -1,4 +1,4 @@
-# Simplenote Command-line Interface
+# Simplenote Command-line Interface [![Build Status](https://travis-ci.org/vrillusions/simplenote-cli.svg?branch=master)](https://travis-ci.org/vrillusions/simplenote-cli) [![Code Issues](https://www.quantifiedcode.com/api/v1/project/721c030585d540e9a0d9c9eddcbfba64/badge.svg)](https://www.quantifiedcode.com/app/project/721c030585d540e9a0d9c9eddcbfba64)
 
 Currently just a way to do offsite backups via command-line but will eventually
 be a more full-featured [simplenote](http://simplenoteapp.com) client.

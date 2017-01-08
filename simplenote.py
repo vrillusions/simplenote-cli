@@ -20,7 +20,6 @@ for note_meta in index['data']:
 import urllib
 import urllib2
 import base64
-import sys
 import logging
 import json
 
@@ -49,7 +48,7 @@ class Simplenote(object):
         self.authtok = ''
         self.api_count = 0
 
-    def _process_query(self, url, query={}, add_authtok=True):
+    def _process_query(self, url, query=None, add_authtok=True):
         """Processes the given url and query dictionary
 
         It's assumed all calls are GET requests and data is returned
@@ -80,10 +79,10 @@ class Simplenote(object):
             fh.close()
         except urllib2.HTTPError, e:
             # Received a non 2xx status code
-            raise SimplenoteError('http error: ' + str(e.code))
+            raise SimplenoteError('http error: {}'.format(e.code))
         except urllib2.URLError, e:
             # Non http error, like network issue
-            raise SimplenoteError('url error:' + e.reason)
+            raise SimplenoteError('url error: {}'.format(e.reason))
         return json.loads(response)
 
     def login(self):
@@ -101,10 +100,10 @@ class Simplenote(object):
             self.authtok = fh.read()
         except urllib2.HTTPError, e:
             # Received a non 2xx status code
-            raise SimplenoteError('http error: ' + str(e.code))
+            raise SimplenoteError('http error: {}'.format(e.code))
         except urllib2.URLError, e:
             # Non http error, like network issue
-            raise SimplenoteError('url error:' + e.reason)
+            raise SimplenoteError('url error: {}'.format(e.reason))
         fh.close()
         return True
 
@@ -114,7 +113,7 @@ class Simplenote(object):
         key: The note's key (can be obtained from index call)
 
         """
-        if key == None:
+        if key is None:
             raise SimplenoteError('Unable to get note: Key not given')
         url = self.base_url + 'data/' + key
         note = self._process_query(url)
