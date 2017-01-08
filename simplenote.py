@@ -65,6 +65,8 @@ class Simplenote(object):
             if self.authtok == '':
                 self._error('No auth token, must login first')
                 return False
+            if query is None:
+                query = {}
             query.update({'auth': self.authtok, 'email': self.email})
 
         if len(query) > 0:
