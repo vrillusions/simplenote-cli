@@ -1,30 +1,23 @@
-# Simplenote Command-line Interface [![Build Status](https://travis-ci.org/vrillusions/simplenote-cli.svg?branch=master)](https://travis-ci.org/vrillusions/simplenote-cli) [![Code Issues](https://www.quantifiedcode.com/api/v1/project/721c030585d540e9a0d9c9eddcbfba64/badge.svg)](https://www.quantifiedcode.com/app/project/721c030585d540e9a0d9c9eddcbfba64)
+# Simplenote Command-line Interface
 
-Currently just a way to do offsite backups via command-line but will eventually
-be a more full-featured [simplenote](http://simplenoteapp.com) client.
+[![Project Status: Abandoned – Initial development has started, but there has not yet been a stable, usable release; the project has been abandoned and the author(s) do not intend on continuing development.](https://www.repostatus.org/badges/latest/abandoned.svg)](https://www.repostatus.org/#abandoned)
 
-# Development Status
+## Project has been abandoned
 
-It currently works but still consider alpha until things are cleared up.
+In early 2019 the old api was shut down.  While trying to get access to new API they suggested [sncli](https://github.com/insanum/sncli) which offers options to backup simplenote plus a whole lot more.  I see it as a superset of what this project can do and still makes it simple to create backups.
 
-CAUTION: if you use this right now only have it run like once a week or longer. It pulls
-all notes regardless if they changed or not.  So if you have 300 notes it's going to make
-a total of 304 api requests to simplenote (300 notes + 3 index calls + 1 login) each time
-you run this!  Eventually it will have a cache so it will only download the notes that 
-have changed, allowing it ro run more frequently.
-
-# Files
+## Files
 
 - simplenote.py: This is the library that is used by sn.py.
 - sn.py: The frontend command line interface.
 
-# Getting started
+## Getting started
 
 Copy config.ini.default to config.ini and add your login information.  Then run sn.py
 to get a backup of your entire simplenote database.  Use the -o option to set the output
 file.
 
-# Formats supported
+## Formats supported
 
 Currently it exports as JSON.  It tries to be compatible with 
 [simplenote import](http://simplenote-import.appspot.com/) but the format could always
